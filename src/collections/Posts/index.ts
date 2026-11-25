@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { Access, AccessArgs, CollectionConfig } from 'payload'
 
 import {
   BlocksFeature,
@@ -6,7 +6,7 @@ import {
   HeadingFeature,
   HorizontalRuleFeature,
   InlineToolbarFeature,
-  lexicalEditor,
+  lexicalEditor, OrderedListFeature, UnorderedListFeature,
 } from '@payloadcms/richtext-lexical'
 
 import { authenticated } from '../../access/authenticated'
@@ -26,14 +26,20 @@ import {
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
 import { slugField } from 'payload'
+import { admin } from '@/access/admin'
+import { editor } from '@/access/editor'
 
+export const adminOrEditor: Access = (accessArgs: AccessArgs) => admin(accessArgs) || editor(accessArgs)
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
   access: {
-    create: authenticated,
-    delete: authenticated,
+    // ABL add adminOrEditor in addition to authenticated
+    create: (accessArgs) => authenticated(accessArgs) && adminOrEditor(accessArgs),
+    // ABL add adminOrEditor in addition to authenticated
+    delete: (accessArgs) => authenticated(accessArgs) && adminOrEditor(accessArgs),
     read: authenticatedOrPublished,
-    update: authenticated,
+    // ABL add adminOrEditor in addition to authenticated
+    update: (accessArgs) => authenticated(accessArgs) && adminOrEditor(accessArgs),
   },
   // This config controls what's populated by default when a post is referenced
   // https://payloadcms.com/docs/queries/select#defaultpopulate-collection-config-property
@@ -93,6 +99,9 @@ export const Posts: CollectionConfig<'posts'> = {
                     FixedToolbarFeature(),
                     InlineToolbarFeature(),
                     HorizontalRuleFeature(),
+                    // ABL: added all of the following features
+                    OrderedListFeature(),
+                    UnorderedListFeature()
                   ]
                 },
               }),

@@ -1,9 +1,14 @@
-import { getPayload } from 'payload'
+import { getPayload, TypedUser } from 'payload'
 import config from '../../src/payload.config.js'
 
-export const testUser = {
+export const testUserForLogin = {
   email: 'dev@payloadcms.com',
   password: 'test',
+}
+
+export const testUser: Partial<Omit<TypedUser, 'id' | 'sizes' | 'createdAt' | 'deletedAt' | 'updatedAt' | 'collection'>> = {
+  ...testUserForLogin,
+  role: 'admin',
 }
 
 /**
@@ -26,6 +31,7 @@ export async function seedTestUser(): Promise<void> {
   await payload.create({
     collection: 'users',
     data: testUser,
+    draft: true,
   })
 }
 
